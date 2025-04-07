@@ -3,9 +3,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-
+//—--constant for max boats
 #define MAX_BOATS 120
 
+//—--this will make the enums for the boats
 typedef enum {
     SLIP,           // slip number [1..85]
     LAND,           // bay letter [A..Z]
@@ -14,6 +15,7 @@ typedef enum {
     LOCATION_UNKNOWN
 } BoatLocation;
 
+//—--this causes the enum to pick the right data type for everything
 struct Boat {
     char name[128];
     float size;
@@ -29,6 +31,7 @@ struct Boat {
 
 struct Boat *marina[MAX_BOATS] = { NULL };
 
+//—--this is how to get the rest of the data from the enum
 BoatLocation parseLocation(const char *locStr) {
     if (strcmp(locStr, "slip") == 0) {
         return SLIP;
@@ -41,7 +44,7 @@ BoatLocation parseLocation(const char *locStr) {
     }
     return LOCATION_UNKNOWN;
 }
-
+//—--this actually creates boat objects
 struct Boat *createBoat(const char *name, float size, double moneyOwed, BoatLocation location) {
     struct Boat *b = malloc(sizeof(struct Boat));
     if (!b) {
@@ -57,6 +60,8 @@ struct Boat *createBoat(const char *name, float size, double moneyOwed, BoatLoca
     return b;
 }
 
+
+//—--adds boats to the marina
 int addBoatToMarina(struct Boat *boat) {
     if (!boat) {
         return -1;
@@ -81,6 +86,7 @@ int addBoatToMarina(struct Boat *boat) {
     return insertIndex; 
 }
 
+//—-takes the data from the CSV and recreates the boat objects in the marina
 int loadMarinaFromCSV(const char *filename) {
     FILE *fp = fopen(filename, "r");
     if (!fp) {
@@ -148,6 +154,8 @@ int loadMarinaFromCSV(const char *filename) {
     return countLoaded;
 }
 
+
+//—--this will output the boat location put in
 const char *locationToString(BoatLocation loc) {
     switch (loc) {
         case SLIP:    return "slip";
@@ -158,6 +166,7 @@ const char *locationToString(BoatLocation loc) {
     }
 }
 
+//—--this will save the data back to the marina after
 int saveMarinaToCSV(const char *filename) {
     FILE *fp = fopen(filename, "w");
     if (!fp) {
@@ -193,6 +202,8 @@ int saveMarinaToCSV(const char *filename) {
     return 0;
 }
 
+
+//—-----this will remove the boat at index
 void removeBoatFromMarina(int index) {
     if (index < 0 || index >= MAX_BOATS) {
         fprintf(stderr, "No boat with that name\n");
@@ -210,6 +221,8 @@ void removeBoatFromMarina(int index) {
     marina[MAX_BOATS - 1] = NULL;
 }
 
+
+//—------main will go through and create the marina, then 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <BoatData.csv>\n", argv[0]);
@@ -220,6 +233,7 @@ int main(int argc, char *argv[]) {
     printf("Loaded %d boats from '%s'\n", loaded, csvFile);
     char command;
     bool running = true;
+//—--this will continue running until the user exits
     while (running) {
         printf("\n(I)nventory, (A)dd, (R)emove, (P)ayment, (M)onth, e(X)it :\n");
         int result = scanf(" %c", &command);
@@ -227,6 +241,7 @@ int main(int argc, char *argv[]) {
             break;
         }
         command = tolower((unsigned char)command);
+//—--------this switch deals with the user input, depending on the char that they input it will put in the correct responce
         switch (command) {
             case 'a': {
                 int ch;
@@ -399,6 +414,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
+//—--finally this saves it back to the CSV so that it is all squared away before the program closes
     if (saveMarinaToCSV(csvFile) == 0) {
         printf("Saved boats to '%s'\n", csvFile);
     }
@@ -410,7 +426,4 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
-
-
-
 
